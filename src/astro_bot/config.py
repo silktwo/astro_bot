@@ -3,8 +3,8 @@ from dataclasses import dataclass
 
 MODEL_REASON = "qwen3.7-plus"
 MODEL_WRITE = "qwen3.7-plus"
-MODEL_VISION = "gemini-3.5-flash"
-MODEL_FALLBACK = "qwen3.7-plus"
+MODEL_VISION = "deepseek-v4-flash"
+MODEL_FALLBACK = "glm-5.2"
 
 
 @dataclass

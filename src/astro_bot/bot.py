@@ -90,8 +90,9 @@ async def on_text(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         return
     store.add_message(uid, "user", text)
     history = store.recent_messages(uid, limit=12)
-    msgs = [{"role": "system", "content": prompts.WRITE_SYSTEM +
-             f"\nКонтекст: натальна карта {natal}"}] + history
+    natal_ctx = natal.get("card_text") or natal.get("highlights") or ""
+    msgs = [{"role": "system", "content": prompts.CHAT_SYSTEM +
+             f"\nЇї натальна карта:\n{natal_ctx}"}] + history
     await update.message.chat.send_action("typing")
     answer = await asyncio.to_thread(llm.chat, msgs)
     store.add_message(uid, "assistant", answer)
@@ -99,14 +100,11 @@ async def on_text(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
 
 async def on_photo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
-    llm: LLM = ctx.bot_data["llm"]
-    f = await update.message.photo[-1].get_file()
-    buf = await f.download_as_bytearray()
-    b64 = base64.b64encode(bytes(buf)).decode()
-    caption = update.message.caption or "Що на цьому фото і як це відгукується сьогодні?"
-    await update.message.chat.send_action("typing")
-    answer = await asyncio.to_thread(llm.see, b64, caption)
-    await update.message.reply_text(answer)
+    # Vision-моделі недоступні на поточному opencode-плані (gemini/claude → 401),
+    # текстові моделі зображення не приймають. Тому просимо опис словами.
+    await update.message.reply_text(
+        "Поки що я не вмію роздивлятись фото 🙈 Опиши словами, що там або що тебе "
+        "хвилює — і я підкажу, як це резонує з твоїм днем і картою.")
 
 
 async def cmd_today(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
@@ -121,6 +119,7 @@ async def cmd_today(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     await update.message.chat.send_action("typing")
     text = await asyncio.to_thread(build_daily, natal, now.year, now.month, now.day,
                                    llm, natal.get("name"))
+    store.add_message(uid, "assistant", "Денний прогноз: " + text)
     await update.message.reply_text(text)
 
 

@@ -34,6 +34,14 @@ def reason_prompt(aspects, signs_trop, signs_sid, natal_context=None):
     )
 
 
+CHAT_SYSTEM = (
+    "Ти особистий астролог цієї дівчини. Відповідай на ЇЇ питання українською, "
+    "спираючись на її натальну карту й сьогоднішні транзити. Стиль: стримано, по суті, "
+    "тепло, але без пафосу й води. Відповідай саме на поставлене питання — НЕ пиши "
+    "щоденний прогноз, якщо тебе про це прямо не просять. Коротко."
+)
+
+
 def daily_prompt(aspects, signs_trop, signs_sid, natal_context=None, name=None):
     who = f"для {name}" if name else ""
     ctx = (f"Натальна карта {who} (її контекст):\n{natal_context}\n\n"
