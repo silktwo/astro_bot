@@ -34,6 +34,22 @@ def reason_prompt(aspects, signs_trop, signs_sid, natal_context=None):
     )
 
 
+def daily_prompt(aspects, signs_trop, signs_sid, natal_context=None, name=None):
+    who = f"для {name}" if name else ""
+    ctx = (f"Натальна карта {who} (її контекст):\n{natal_context}\n\n"
+           if natal_context else "")
+    return (
+        ctx +
+        "Транзитні аспекти сьогодні (спільні для обох систем):\n"
+        + json.dumps(aspects, ensure_ascii=False) +
+        "\n\nЗнаки планет сьогодні — тропічна система:\n"
+        + json.dumps(signs_trop, ensure_ascii=False) +
+        "\n\nЗнаки планет сьогодні — сидеральна система:\n"
+        + json.dumps(signs_sid, ensure_ascii=False) +
+        f"\n\nНапиши короткий, сухий денний прогноз {who} українською за цими даними."
+    )
+
+
 def write_prompt(analysis, name=None):
     who = f" для {name}" if name else ""
     return (

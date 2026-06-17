@@ -9,8 +9,9 @@ def test_build_daily_pipeline():
         "Mars": 103.28, "Jupiter": 61.27, "Saturn": 57.22, "Uranus": 320.15,
         "Neptune": 305.77, "Pluto": 250.6}}
     llm = MagicMock()
-    llm.reason.return_value = "аналіз тем дня"
-    llm.write.return_value = "Теплий прогноз українською."
+    llm.write.return_value = "Короткий прогноз українською."
     text = build_daily(natal, 2026, 6, 17, llm, name="Анна")
-    assert text == "Теплий прогноз українською."
-    assert "аналіз тем дня" in llm.write.call_args[0][0]
+    assert text == "Короткий прогноз українською."
+    # один прохід: лише write, без окремого reason
+    assert llm.write.called
+    assert not llm.reason.called

@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import datetime as dt
 import re
@@ -91,7 +92,8 @@ async def on_text(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     history = store.recent_messages(uid, limit=12)
     msgs = [{"role": "system", "content": prompts.WRITE_SYSTEM +
              f"\nКонтекст: натальна карта {natal}"}] + history
-    answer = llm.chat(msgs)
+    await update.message.chat.send_action("typing")
+    answer = await asyncio.to_thread(llm.chat, msgs)
     store.add_message(uid, "assistant", answer)
     await update.message.reply_text(answer)
 
@@ -102,7 +104,8 @@ async def on_photo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     buf = await f.download_as_bytearray()
     b64 = base64.b64encode(bytes(buf)).decode()
     caption = update.message.caption or "Що на цьому фото і як це відгукується сьогодні?"
-    answer = llm.see(b64, caption)
+    await update.message.chat.send_action("typing")
+    answer = await asyncio.to_thread(llm.see, b64, caption)
     await update.message.reply_text(answer)
 
 
@@ -115,8 +118,9 @@ async def cmd_today(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Спершу надішли дату й місто народження 🙏")
         return
     now = dt.datetime.now()
-    text = build_daily(natal, now.year, now.month, now.day, llm,
-                       name=natal.get("name"))
+    await update.message.chat.send_action("typing")
+    text = await asyncio.to_thread(build_daily, natal, now.year, now.month, now.day,
+                                   llm, natal.get("name"))
     await update.message.reply_text(text)
 
 
@@ -140,15 +144,15 @@ async def _push_daily(app, cfg, store, llm):
     for uid in store.all_users_with_natal():
         natal = store.get_natal(uid)
         try:
-            text = build_daily(natal, now.year, now.month, now.day, llm,
-                               name=natal.get("name"))
+            text = await asyncio.to_thread(build_daily, natal, now.year, now.month,
+                                           now.day, llm, natal.get("name"))
             await app.bot.send_message(chat_id=uid, text=text)
         except Exception:
             log.exception("daily push failed for %s", uid)
 
 
 def build_app(cfg: config.Config, store: Store, llm: LLM) -> Application:
-    app = Application.builder().token(cfg.telegram_token).build()
+    app = Application.builder().token(cfg.telegram_token).concurrent_updates(True).build()
     app.bot_data.update({"cfg": cfg, "store": store, "llm": llm})
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("today", cmd_today))
@@ -176,7 +180,7 @@ def main():
     async def _post_init(_):
         sched.start()
     app.post_init = _post_init
-    app.run_polling()
+    app.run_polling(drop_pending_updates=True)
 
 
 if __name__ == "__main__":
