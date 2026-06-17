@@ -1,0 +1,21 @@
+{
+  "name": "Анна",
+  "sidereal_signs": {
+    "Sun": "Gemini", "Moon": "Leo", "Mercury": "Gemini", "Venus": "Gemini",
+    "Mars": "Gemini", "Jupiter": "Taurus", "Saturn": "Taurus",
+    "Uranus": "Capricorn", "Neptune": "Capricorn", "Pluto": "Scorpio",
+    "Rising": "Virgo"
+  },
+  "tropical_signs": {
+    "Sun": "Cancer", "Moon": "Virgo", "Mercury": "Cancer", "Venus": "Cancer",
+    "Mars": "Cancer", "Jupiter": "Gemini", "Saturn": "Taurus",
+    "Uranus": "Aquarius", "Neptune": "Aquarius", "Pluto": "Sagittarius",
+    "Rising": "Libra"
+  },
+  "highlights": "Stellium у 9-му домі (Sun, Mercury, Venus, Mars, N Node); Asc Терези/Діва; сильний акцент води; Jupiter-Saturn у 8-му.",
+  "planets": {
+    "Sun": 104.68, "Moon": 168.68, "Mercury": 104.72, "Venus": 111.57,
+    "Mars": 103.28, "Jupiter": 61.27, "Saturn": 57.22, "Uranus": 320.15,
+    "Neptune": 305.77, "Pluto": 250.6
+  }
+}
