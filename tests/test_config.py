@@ -3,7 +3,7 @@ from astro_bot import config
 
 def test_loads_models():
     assert config.MODEL_REASON == "qwen3.7-plus"
-    assert config.MODEL_WRITE == "claude-sonnet-4.6"
+    assert config.MODEL_WRITE == "qwen3.7-plus"
     assert config.MODEL_VISION == "gemini-3.5-flash"
 
 

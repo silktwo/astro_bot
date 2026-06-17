@@ -2,7 +2,7 @@ import os
 from dataclasses import dataclass
 
 MODEL_REASON = "qwen3.7-plus"
-MODEL_WRITE = "claude-sonnet-4.6"
+MODEL_WRITE = "qwen3.7-plus"
 MODEL_VISION = "gemini-3.5-flash"
 MODEL_FALLBACK = "qwen3.7-plus"
 
