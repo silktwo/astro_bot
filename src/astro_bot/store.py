@@ -36,6 +36,10 @@ class Store:
             "SELECT data FROM natal WHERE user_id=?", (user_id,)).fetchone()
         return json.loads(row["data"]) if row else None
 
+    def all_users_with_natal(self):
+        rows = self.conn.execute("SELECT user_id FROM natal").fetchall()
+        return [r["user_id"] for r in rows]
+
     def add_message(self, user_id, role, content):
         self.conn.execute(
             "INSERT INTO history(user_id, role, content) VALUES(?,?,?)",

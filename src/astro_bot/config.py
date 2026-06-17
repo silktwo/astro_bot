@@ -17,6 +17,7 @@ class Config:
     push_hour: int
     push_tz: str
     swisseph_path: str
+    seed_path: str
 
 
 def load() -> Config:
@@ -30,4 +31,5 @@ def load() -> Config:
         push_hour=int(os.environ.get("PUSH_HOUR", "18")),
         push_tz=os.environ.get("PUSH_TZ", "Europe/Warsaw"),
         swisseph_path=os.environ.get("SWISSEPH_PATH", "/app/ephe"),
+        seed_path=os.environ.get("SEED_PATH", "/app/data/anna_natal.json"),
     )

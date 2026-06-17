@@ -14,6 +14,13 @@ def test_get_missing_natal_is_none(tmp_path):
     assert s.get_natal(99) is None
 
 
+def test_all_users_with_natal(tmp_path):
+    s = Store(str(tmp_path / "t.db"))
+    s.set_natal(1, {"name": "a"})
+    s.set_natal(2, {"name": "b"})
+    assert sorted(s.all_users_with_natal()) == [1, 2]
+
+
 def test_history_roundtrip(tmp_path):
     s = Store(str(tmp_path / "t.db"))
     s.add_message(42, "user", "привіт")

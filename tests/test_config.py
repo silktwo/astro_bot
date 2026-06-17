@@ -13,3 +13,4 @@ def test_push_defaults(monkeypatch):
     cfg = config.load()
     assert cfg.push_hour == 18
     assert cfg.push_tz == "Europe/Warsaw"
+    assert cfg.seed_path.endswith("anna_natal.json")

@@ -13,6 +13,7 @@ from astro_bot import config, prompts
 from astro_bot.store import Store
 from astro_bot.llm import LLM
 from astro_bot.forecast import build_daily
+from astro_bot.natal_import import load_seed
 
 log = logging.getLogger("astro_bot")
 
@@ -60,13 +61,14 @@ def _geocode(city):
 async def cmd_start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     store: Store = ctx.bot_data["store"]
     uid = update.effective_user.id
-    if store.get_natal(uid):
-        await update.message.reply_text("Привіт, сонечко 🌙 Я вже знаю твою карту. "
-            "Щодня о 18:00 надсилатиму прогноз. Можеш питати будь-що.")
-    else:
-        await update.message.reply_text("Привіт 🌙 Я твій астро-провідник. "
-            "Щоб скласти твою карту — напиши дату, час і місто народження, напр.:\n"
-            "`15.06.1995 14:30 Київ`\n(якщо не знаєш точний час — просто дату й місто)")
+    # Перший контакт: запамʼятовуємо чат і одразу привʼязуємо засіджену карту.
+    if not store.get_natal(uid):
+        seed = ctx.bot_data.get("seed")
+        if seed:
+            store.set_natal(uid, seed)
+    await update.message.reply_text("Привіт, сонечко 🌙 Я вже знаю твою карту. "
+        "Щодня о 18:00 надсилатиму тобі прогноз сюди. Можеш питати будь-що — "
+        "або напиши /today, щоб отримати прогноз прямо зараз.")
 
 
 async def on_text(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
@@ -133,15 +135,16 @@ async def cmd_setbirth(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
 # ── Scheduler ───────────────────────────────────────────────────────
 async def _push_daily(app, cfg, store, llm):
-    if not cfg.gf_id:
-        return
-    natal = store.get_natal(cfg.gf_id)
-    if not natal:
-        return
+    # Шлемо всім чатам, що вже стартували бота (мають карту). ID не потрібен.
     now = dt.datetime.now(pytz.timezone(cfg.push_tz))
-    text = build_daily(natal, now.year, now.month, now.day, llm,
-                       name=natal.get("name"))
-    await app.bot.send_message(chat_id=cfg.gf_id, text=text)
+    for uid in store.all_users_with_natal():
+        natal = store.get_natal(uid)
+        try:
+            text = build_daily(natal, now.year, now.month, now.day, llm,
+                               name=natal.get("name"))
+            await app.bot.send_message(chat_id=uid, text=text)
+        except Exception:
+            log.exception("daily push failed for %s", uid)
 
 
 def build_app(cfg: config.Config, store: Store, llm: LLM) -> Application:
@@ -161,6 +164,10 @@ def main():
     store = Store("/data/natal.db")
     llm = LLM(cfg=cfg)
     app = build_app(cfg, store, llm)
+    try:
+        app.bot_data["seed"] = load_seed(cfg.seed_path)
+    except Exception:
+        log.warning("seed not loaded from %s", cfg.seed_path)
 
     sched = AsyncIOScheduler(timezone=pytz.timezone(cfg.push_tz))
     sched.add_job(lambda: app.create_task(_push_daily(app, cfg, store, llm)),
