@@ -5,3 +5,4 @@ __pycache__/
 .venv/
 .pytest_cache/
 ephe/
+.DS_Store

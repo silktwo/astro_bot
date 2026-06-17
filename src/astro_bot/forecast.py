@@ -13,8 +13,10 @@ def build_daily(natal_data, year, month, day, llm, name=None, hour_ut=12.0):
     today_sid = ephemeris.planet_positions(year, month, day, hour_ut, sidereal=True)
     signs_trop = ephemeris.signs(today_trop)
     signs_sid = ephemeris.signs(today_sid)
-    # reasoning → writing
-    analysis = llm.reason(prompts.reason_prompt(aspects, signs_trop, signs_sid),
-                          system=prompts.REASON_SYSTEM)
+    # reasoning → writing (контекст реальної карти, якщо є)
+    natal_context = natal_data.get("card_text") or natal_data.get("highlights")
+    analysis = llm.reason(
+        prompts.reason_prompt(aspects, signs_trop, signs_sid, natal_context),
+        system=prompts.REASON_SYSTEM)
     return llm.write(prompts.write_prompt(analysis, name),
                      system=prompts.WRITE_SYSTEM)

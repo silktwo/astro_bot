@@ -17,15 +17,18 @@ WRITE_SYSTEM = (
 )
 
 
-def reason_prompt(aspects, signs_trop, signs_sid):
+def reason_prompt(aspects, signs_trop, signs_sid, natal_context=None):
+    ctx = (f"НАТАЛЬНА КАРТА (її особистий контекст):\n{natal_context}\n\n"
+           if natal_context else "")
     return (
+        ctx +
         "Транзитні аспекти до натала (спільні для обох систем):\n"
         + json.dumps(aspects, ensure_ascii=False) +
         "\n\nЗнаки планет СЬОГОДНІ — тропічна система:\n"
         + json.dumps(signs_trop, ensure_ascii=False) +
         "\n\nЗнаки планет СЬОГОДНІ — сидеральна система:\n"
         + json.dumps(signs_sid, ensure_ascii=False) +
-        "\n\nВиділи ключові теми дня."
+        "\n\nВиділи ключові теми дня саме для цієї людини."
     )
 
 
