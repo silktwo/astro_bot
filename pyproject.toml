@@ -15,8 +15,12 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
 
+[tool.vercel]
+entrypoint = "app.py"
+
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["."]
+include = ["astro_bot*"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["."]

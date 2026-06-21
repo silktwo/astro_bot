@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from openai import OpenAI
 
 from astro_bot import config

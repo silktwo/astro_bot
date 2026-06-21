@@ -11,10 +11,8 @@
 ## Архітектура
 
 ```
-api/
-  telegram.py      webhook: приймає апдейти Telegram (POST), відповідає через Bot API
-  cron.py          щоденний прогноз (GET від Vercel Cron)
-src/astro_bot/
+app.py             Vercel-entrypoint (WSGI): маршрутизує /api/telegram (webhook) і /api/cron
+astro_bot/
   handlers.py      stateless-логіка: маршрутизація апдейтів, збірка прогнозу/відповіді
   telegram_api.py  мінімальний клієнт Telegram Bot API (stdlib)
   config.py        конфіг з env-змінних, ідентифікатори моделей
