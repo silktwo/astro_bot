@@ -4,6 +4,5 @@ __pycache__/
 *.db
 .venv/
 .pytest_cache/
-ephe/
 .DS_Store
 src/astro_bot.egg-info/

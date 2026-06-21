@@ -1,79 +1,76 @@
 # astro_bot 🔭
 
-Персональний Telegram-бот для денного астропрогнозу. Щодня о 18:00 (Europe/Warsaw)
-надсилає користувачу прогноз на основі його натальної карти, а також відповідає на
-запитання у вільній формі. Натальна карта рахується через Swiss Ephemeris, тексти
-генерує LLM.
+Персональний Telegram-бот для денного астропрогнозу, що **живе на Vercel** (serverless).
+Щодня о 18:00 (Europe/Warsaw) надсилає прогноз на основі натальної карти й відповідає
+на питання у вільній формі. Карта рахується через Swiss Ephemeris, тексти генерує LLM.
 
-## Можливості
+Бот **stateless** і **на одного користувача**: «памʼять» — це натальна карта у файлі
+`data/anna_natal.json` (read-only, бо на Vercel немає постійного диска). Журнал
+переписки не ведеться.
 
-- **Денний прогноз** — автоматична розсилка о 18:00 усім, хто запустив бота (`/today` — отримати зараз).
-- **Чат** — вільні питання з урахуванням натальної карти та історії діалогу.
-- **Розпізнавання дати народження** з тексту `ДД.ММ.РРРР [ГГ:ХХ] Місто` (геокодинг + визначення таймзони).
-- **Адмін-команда** `/setbirth <user_id> ДД.ММ.РРРР ГГ:ХХ Місто` — задати карту іншому користувачу.
-
-## Структура
+## Архітектура
 
 ```
+api/
+  telegram.py      webhook: приймає апдейти Telegram (POST), відповідає через Bot API
+  cron.py          щоденний прогноз (GET від Vercel Cron)
 src/astro_bot/
-  bot.py           точка входу: Telegram-хендлери, планувальник розсилки
+  handlers.py      stateless-логіка: маршрутизація апдейтів, збірка прогнозу/відповіді
+  telegram_api.py  мінімальний клієнт Telegram Bot API (stdlib)
   config.py        конфіг з env-змінних, ідентифікатори моделей
-  ephemeris.py     розрахунки положень планет (Swiss Ephemeris / pyswisseph)
-  natal_import.py  завантаження засідженої натальної карти (seed JSON)
+  ephemeris.py     положення планет і транзити (pyswisseph)
   forecast.py      збірка тексту денного прогнозу
   llm.py           клієнт LLM (OpenAI-сумісний API)
   prompts.py       системні промпти
-  store.py         сховище натальних карт та історії (SQLite: /data/natal.db)
-data/
-  anna_natal.json  засіджена натальна карта
-docs/
-  specs/, plans/   дизайн і план реалізації
-tests/             pytest-набір на всі модулі
-Dockerfile         образ (підтягує файли Swiss Ephemeris)
-docker-compose.yml сервіс + іменований volume astro-data для БД
+  natal_import.py  завантаження карти з seed JSON
+data/anna_natal.json   натальна карта (read-only памʼять)
+ephe/*.se1             файли Swiss Ephemeris
+vercel.json            функції (maxDuration) + cron-розклад
+requirements.txt       залежності для Vercel Python runtime
+tests/                 pytest
 ```
 
-## Запуск
+## Деплой на Vercel
 
-### Docker (рекомендовано)
+1. **Import** репозиторію у Vercel (Framework Preset: *Other*).
+2. **Environment Variables** (значення — з бекапу `.env`):
 
-```bash
-cp .env.example .env   # і заповнити реальними значеннями
-docker compose up -d --build
-```
+   | Змінна | Опис |
+   |---|---|
+   | `TELEGRAM_BOT_TOKEN` | токен від @BotFather |
+   | `RECIPIENT_CHAT_ID` | chat_id отримувача денного прогнозу |
+   | `TELEGRAM_WEBHOOK_SECRET` | довільний секрет для валідації вебхука |
+   | `OPENCODE_API_KEY` / `OPENCODE_BASE_URL` | LLM API |
+   | `PUSH_TZ` | таймзона прогнозу (`Europe/Warsaw`) |
 
-БД зберігається в іменованому volume `astro-data` (`/data/natal.db` всередині контейнера).
+   `CRON_SECRET` Vercel створює сам; `SWISSEPH_PATH`/`SEED_PATH` визначаються з кореня репо.
 
-### Локально
+3. **Deploy.** Cron (`vercel.json`) активується автоматично: `0 16 * * *` UTC = 18:00 за
+   літнім київ./варш. часом (узимку — 17:00; Vercel Cron без таймзон, на Hobby — раз/добу).
+
+4. **Зареєструвати webhook** (одноразово):
+
+   ```bash
+   curl "https://api.telegram.org/bot<TOKEN>/setWebhook" \
+     -d "url=https://<project>.vercel.app/api/telegram" \
+     -d "secret_token=<TELEGRAM_WEBHOOK_SECRET>"
+   ```
+
+## Команди бота
+
+- `/start` — привітання.
+- `/today` — денний прогноз прямо зараз.
+- будь-який текст — питання до астролога (відповідь спирається на карту).
+- фото — ввічлива відмова (vision недоступний на поточному плані).
+
+## Локальна розробка / тести
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-cp .env.example .env    # заповнити
-python -m astro_bot.bot
-```
-
-Тести:
-
-```bash
 pytest
 ```
 
-## Конфігурація (`.env`)
-
-| Змінна | Опис |
-|---|---|
-| `TELEGRAM_BOT_TOKEN` | токен бота від @BotFather |
-| `OPENCODE_API_KEY` | ключ LLM-провайдера (OpenAI-сумісний) |
-| `OPENCODE_BASE_URL` | базовий URL API |
-| `ADMIN_TELEGRAM_ID` | Telegram-ID адміна (для `/setbirth`) |
-| `PUSH_HOUR` | година денної розсилки (за замовч. `18`) |
-| `PUSH_TZ` | таймзона розсилки (`Europe/Warsaw`) |
-| `SWISSEPH_PATH` | шлях до файлів Swiss Ephemeris |
-| `SEED_PATH` | шлях до seed-JSON натальної карти |
-
-> `.env` із реальними секретами в репозиторій **не** комітиться (див. `.gitignore`).
-
 ## Стек
 
-Python 3.11+ · python-telegram-bot · pyswisseph · APScheduler · OpenAI SDK · geopy · timezonefinder
+Python 3.11+ · pyswisseph · OpenAI SDK · pytz · Vercel (serverless functions + cron)
