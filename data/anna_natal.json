@@ -1,0 +1,34 @@
+{
+  "name": "Анна",
+  "planets": {
+    "Sun": 104.68, "Moon": 168.68, "Mercury": 104.72, "Venus": 111.57,
+    "Mars": 103.28, "Jupiter": 61.27, "Saturn": 57.22, "Uranus": 320.15,
+    "Neptune": 305.77, "Pluto": 250.6, "Lilith": 284.18, "NorthNode": 114.6
+  },
+  "retrograde": ["Mercury", "Uranus", "Neptune", "Pluto"],
+  "tropical_signs": {
+    "Sun": "Cancer", "Moon": "Virgo", "Mercury": "Cancer", "Venus": "Cancer",
+    "Mars": "Cancer", "Jupiter": "Gemini", "Saturn": "Taurus",
+    "Uranus": "Aquarius", "Neptune": "Aquarius", "Pluto": "Sagittarius",
+    "Lilith": "Capricorn", "NorthNode": "Cancer", "Rising": "Libra"
+  },
+  "sidereal_signs": {
+    "Sun": "Gemini", "Moon": "Leo", "Mercury": "Gemini", "Venus": "Gemini",
+    "Mars": "Gemini", "Jupiter": "Taurus", "Saturn": "Taurus",
+    "Uranus": "Capricorn", "Neptune": "Capricorn", "Pluto": "Scorpio",
+    "NorthNode": "Cancer", "Rising": "Virgo"
+  },
+  "houses": {
+    "ASC": "Libra 19°19'", "IC": "Capricorn 24°48'",
+    "DESC": "Aries 19°19'", "MC": "Cancer 24°48'"
+  },
+  "planets_in_houses": {
+    "Sun": 9, "Moon": 11, "Mercury": 9, "Venus": 9, "Mars": 9,
+    "Jupiter": 8, "Saturn": 8, "Uranus": 4, "Neptune": 4, "Pluto": 2,
+    "Lilith": 3, "NorthNode": 9
+  },
+  "elements": {"fire": 1, "earth": 2, "air": 3, "water": 4},
+  "modalities": {"cardinal": 4, "fixed": 3, "mutable": 3},
+  "highlights": "Stellium у 9-му домі (Sun, Mercury, Venus, Mars, N Node) — філософія, подорожі, вища освіта, іноземні культури. 4 ретроградні планети (Mercury, Uranus, Neptune, Pluto). Сильний акцент води (4 планети в Раку). Дуже тісні кон'юнкції Сонця: Mercury 0°02', Mars 1°24', опозиція Lilith 0°30'. Jupiter+Saturn у 8-му домі — глибока трансформація через партнерства й ресурси.",
+  "card_text": "Анна — натальна карта (Tropical / Placidus).\nПЛАНЕТИ (тропіка): Sun ♋Cancer 14°41' (9 дім); Moon ♍Virgo 18°41' (11 дім); Mercury ♋Cancer 14°43' R (9 дім); Venus ♋Cancer 21°34' (9 дім); Mars ♋Cancer 13°17' (9 дім); Jupiter ♊Gemini 1°16' (8 дім); Saturn ♉Taurus 27°13' (8 дім); Uranus ♒Aquarius 20°09' R (4 дім); Neptune ♒Aquarius 5°46' R (4 дім); Pluto ♐Sagittarius 10°36' R (2 дім); Lilith ♑Capricorn 14°11' (3 дім); N Node ♋Cancer 24°36' (9 дім).\nДОМИ: ASC ♎Libra 19°19'; IC ♑Capricorn 24°48'; DESC ♈Aries 19°19'; MC ♋Cancer 24°48'.\nКЛЮЧОВІ АСПЕКТИ: Sun☌Mercury (0°02'); Sun☌Mars (1°24'); Sun☍Lilith (0°30'); Sun⚹Moon (4°00'); Mercury☍Lilith (0°32'); Mars☍Lilith (0°54'); Venus☌MC (3°15'); Jupiter☌Saturn (4°03'); Jupiter△Neptune (4°30'); Uranus△ASC (0°50'); Moon⚹Venus (2°53').\nСТИХІЇ: вода 4, повітря 3, земля 2, вогонь 1. МОДАЛЬНОСТІ: кардинальна 4, фіксована 3, мутабельна 3.\nSIDEREAL (True): Sun ♊Gemini; Moon ♌Leo; Mercury/Venus/Mars ♊Gemini; Jupiter/Saturn ♉Taurus; Uranus/Neptune ♑Capricorn; Pluto ♏Scorpio; Rising ♍Virgo.\nДодаткові точки: Part of Fortune ♐Sagittarius 23°19'; South Node ♑Capricorn 24°36'.\nОСОБЛИВОСТІ: стелліум у 9-му домі; сильний акцент води; 4 ретрограді; Jupiter-Saturn у 8-му домі."
+}
