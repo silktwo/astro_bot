@@ -1,7 +1,18 @@
 {
   "functions": {
-    "app.py": { "maxDuration": 60 }
+    "api/telegram.py": {
+      "maxDuration": 60,
+      "includeFiles": "{astro_bot/**,data/**,ephe/**}"
+    },
+    "api/cron.py": {
+      "maxDuration": 60,
+      "includeFiles": "{astro_bot/**,data/**,ephe/**}"
+    },
+    "api/health.py": { "maxDuration": 10 }
   },
+  "rewrites": [
+    { "source": "/health", "destination": "/api/health" }
+  ],
   "crons": [
     { "path": "/api/cron", "schedule": "0 16 * * *" }
   ]
