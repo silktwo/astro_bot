@@ -22,6 +22,11 @@ from astro_bot.telegram_api import Bot
 
 log = logging.getLogger("astro_bot")
 
+_FAILURE_REPLY = (
+    "Я тимчасово не можу відповісти 😔 Спробуй ще раз трохи пізніше, "
+    "а я вже записав помилку в логах."
+)
+
 
 def _resp(start_response, status: str, body=b"ok"):
     if isinstance(body, str):
@@ -47,6 +52,7 @@ def _telegram(environ, start_response):
     except ValueError:
         return _resp(start_response, "400 Bad Request", b"bad json")
     # Завжди 200, щоб Telegram не ретраїв при внутрішній помилці.
+    fallback_chat_id = (update.get("message") or update.get("edited_message") or {}).get("chat", {}).get("id")
     try:
         llm = LLM(cfg=cfg)
         seed = load_seed(cfg.seed_path)
@@ -56,11 +62,16 @@ def _telegram(environ, start_response):
             bot = Bot(cfg.telegram_token)
             try:
                 bot.send_chat_action(chat_id, "typing")
-            except Exception:
-                pass
+            except OSError:
+                log.debug("telegram typing action failed", exc_info=True)
             bot.send_message(chat_id, reply)
     except Exception:
         log.exception("webhook handling failed")
+        if fallback_chat_id:
+            try:
+                Bot(cfg.telegram_token).send_message(fallback_chat_id, _FAILURE_REPLY)
+            except OSError:
+                log.exception("telegram failure reply failed")
     return _resp(start_response, "200 OK", b"ok")
 
 

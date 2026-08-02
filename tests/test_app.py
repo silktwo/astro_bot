@@ -1,4 +1,5 @@
 import io
+import json
 
 import app
 
@@ -16,6 +17,11 @@ def _environ(path="/api/cron", method="GET", body=b"", auth=""):
         "wsgi.input": io.BytesIO(body),
         "HTTP_AUTHORIZATION": auth,
     }
+
+
+def _telegram_environ(text="привіт", chat_id=42):
+    body = json.dumps({"message": {"chat": {"id": chat_id}, "text": text}}).encode()
+    return _environ(path="/api/telegram", method="POST", body=body)
 
 
 def test_cron_requires_recipient_chat_id(monkeypatch):
@@ -53,3 +59,38 @@ def test_cron_sends_daily_text_to_configured_recipient(monkeypatch):
     assert _start_response.status == "200 OK"
     assert body == b"sent"
     assert sent == [("token", 42, "daily")]
+
+
+def test_telegram_sends_failure_reply_when_llm_fails(monkeypatch):
+    sent = []
+
+    class FailingLLM:
+        def __init__(self, cfg):
+            self.cfg = cfg
+
+        def chat(self, messages):
+            raise RuntimeError("provider unavailable")
+
+    class FakeBot:
+        def __init__(self, token):
+            self.token = token
+
+        def send_chat_action(self, chat_id, action):
+            sent.append((chat_id, action))
+
+        def send_message(self, chat_id, text):
+            sent.append((chat_id, text))
+
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "token")
+    monkeypatch.setenv("OPENCODE_API_KEY", "key")
+    monkeypatch.delenv("TELEGRAM_WEBHOOK_SECRET", raising=False)
+    monkeypatch.setattr(app, "LLM", FailingLLM)
+    monkeypatch.setattr(app, "Bot", FakeBot)
+    monkeypatch.setattr(app, "load_seed", lambda path: {"name": "Анна", "card_text": "карта"})
+
+    body = b"".join(app.app(_telegram_environ(), _start_response))
+
+    assert _start_response.status == "200 OK"
+    assert body == b"ok"
+    assert sent[-1][0] == 42
+    assert "тимчасово не можу" in sent[-1][1]
