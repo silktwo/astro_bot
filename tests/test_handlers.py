@@ -30,14 +30,20 @@ def test_start_returns_greeting():
 def test_today_builds_forecast(monkeypatch):
     monkeypatch.setattr(handlers, "build_daily",
                         lambda *a, **k: "Прогноз на сьогодні")
-    chat_id, reply = handlers.handle_update(_msg("/today"), CFG, MagicMock(), SEED)
+    _, reply = handlers.handle_update(_msg("/today"), CFG, MagicMock(), SEED)
     assert reply == "Прогноз на сьогодні"
+
+
+def test_id_returns_chat_id_for_cron_setup():
+    chat_id, reply = handlers.handle_update(_msg("/id"), CFG, MagicMock(), SEED)
+    assert chat_id == 42
+    assert "RECIPIENT_CHAT_ID=42" in reply
 
 
 def test_free_text_calls_llm_with_card_context():
     llm = MagicMock()
     llm.chat.return_value = "Відповідь"
-    chat_id, reply = handlers.handle_update(_msg("що з коханням?"), CFG, llm, SEED)
+    _, reply = handlers.handle_update(_msg("що з коханням?"), CFG, llm, SEED)
     assert reply == "Відповідь"
     sent = llm.chat.call_args[0][0]
     assert sent[0]["role"] == "system" and "карта" in sent[0]["content"]
@@ -46,7 +52,7 @@ def test_free_text_calls_llm_with_card_context():
 
 def test_photo_declines_without_llm():
     llm = MagicMock()
-    chat_id, reply = handlers.handle_update(_msg(photo=True), CFG, llm, SEED)
+    _, reply = handlers.handle_update(_msg(photo=True), CFG, llm, SEED)
     assert "фото" in reply
     llm.chat.assert_not_called()
 

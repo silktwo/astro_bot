@@ -14,7 +14,8 @@ _PHOTO_REPLY = ("Поки що я не вмію роздивлятись фот�
                 "тебе хвилює — і я підкажу, як це резонує з твоїм днем і картою.")
 _START_REPLY = ("Привіт, сонечко 🌙 Я вже знаю твою карту. Щодня о 18:00 надсилатиму "
                 "тобі прогноз сюди. Напиши /today, щоб отримати прогноз прямо зараз, "
-                "або просто запитай мене будь-що.")
+                "або просто запитай мене будь-що. Якщо прогноз сам не приходить, "
+                "напиши /id і постав цей chat_id у RECIPIENT_CHAT_ID на Vercel.")
 
 
 def daily_text(cfg: config.Config, llm, seed: dict) -> str:
@@ -48,6 +49,8 @@ def handle_update(update: dict, cfg: config.Config, llm, seed: dict):
         cmd = text[1:].split()[0].split("@")[0].lower()
         if cmd == "start":
             return chat_id, _START_REPLY
+        if cmd == "id":
+            return chat_id, f"Для щоденного прогнозу постав на Vercel: RECIPIENT_CHAT_ID={chat_id}"
         if cmd == "today":
             return chat_id, daily_text(cfg, llm, seed)
         # будь-яка інша команда — трактуємо як питання
