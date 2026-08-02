@@ -3,6 +3,7 @@ import json
 
 import app
 from api import cron as cron_api
+from api import debug as debug_api
 from api import health as health_api
 from api import telegram as telegram_api
 
@@ -104,3 +105,20 @@ def test_health_function_returns_ok():
 
     assert _start_response.status == "200 OK"
     assert body == b"astro_bot ok"
+
+
+def test_debug_function_reports_env_without_secrets(monkeypatch):
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "token")
+    monkeypatch.setenv("OPENCODE_API_KEY", "key")
+    monkeypatch.delenv("RECIPIENT_CHAT_ID", raising=False)
+    monkeypatch.setattr(app, "telegram_get_me", lambda token: "AstroEphemerisBot")
+
+    body = b"".join(debug_api.app(_environ(path="/api/debug"), _start_response))
+
+    assert _start_response.status == "200 OK"
+    assert json.loads(body) == {
+        "telegram_token": True,
+        "opencode_api_key": True,
+        "recipient_chat_id": False,
+        "telegram_get_me": "AstroEphemerisBot",
+    }

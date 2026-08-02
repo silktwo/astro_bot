@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import urllib.request
 
 _ROOT = os.path.dirname(os.path.abspath(__file__))
 os.environ.setdefault("SWISSEPH_PATH", os.path.join(_ROOT, "ephe"))
@@ -34,6 +35,38 @@ def _resp(start_response, status: str, body=b"ok"):
     start_response(status, [("Content-Type", "text/plain; charset=utf-8"),
                             ("Content-Length", str(len(body)))])
     return [body]
+
+
+def _json_resp(start_response, status: str, payload):
+    body = json.dumps(payload).encode("utf-8")
+    start_response(status, [("Content-Type", "application/json; charset=utf-8"),
+                            ("Content-Length", str(len(body)))])
+    return [body]
+
+
+def telegram_get_me(token: str) -> str | None:
+    if not token:
+        return None
+    req = urllib.request.Request(f"https://api.telegram.org/bot{token}/getMe")
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.load(resp)
+    except (OSError, TimeoutError, ValueError):
+        return None
+    result = data.get("result") if isinstance(data, dict) else None
+    username = result.get("username") if isinstance(result, dict) else None
+    return username if isinstance(username, str) else None
+
+
+def _debug(environ, start_response):
+    cfg = config.load()
+    payload = {
+        "telegram_token": bool(cfg.telegram_token),
+        "opencode_api_key": bool(cfg.api_key),
+        "recipient_chat_id": cfg.recipient_chat_id is not None,
+        "telegram_get_me": telegram_get_me(cfg.telegram_token),
+    }
+    return _json_resp(start_response, "200 OK", payload)
 
 
 def _telegram(environ, start_response):
@@ -101,6 +134,8 @@ def app(environ, start_response):
         return _telegram(environ, start_response)
     if path == "/api/cron":
         return _cron(environ, start_response)
+    if path == "/api/debug":
+        return _debug(environ, start_response)
     if path in ("", "/health"):
         return _resp(start_response, "200 OK", b"astro_bot ok")
     return _resp(start_response, "404 Not Found", b"not found")

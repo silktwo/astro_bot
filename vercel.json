@@ -8,7 +8,11 @@
       "maxDuration": 60,
       "includeFiles": "{astro_bot/**,data/**,ephe/**}"
     },
-    "api/health.py": { "maxDuration": 10 }
+    "api/health.py": { "maxDuration": 10 },
+    "api/debug.py": {
+      "maxDuration": 10,
+      "includeFiles": "{astro_bot/**,data/**,ephe/**}"
+    }
   },
   "rewrites": [
     { "source": "/health", "destination": "/api/health" }
