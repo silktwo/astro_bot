@@ -96,6 +96,7 @@ def test_telegram_sends_failure_reply_when_llm_fails(monkeypatch):
 
     assert _start_response.status == "200 OK"
     assert body == b"ok"
+    assert sent[0] == (42, "typing")
     assert sent[-1][0] == 42
     assert "тимчасово не можу" in sent[-1][1]
 

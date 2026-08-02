@@ -87,17 +87,18 @@ def _telegram(environ, start_response):
     # Завжди 200, щоб Telegram не ретраїв при внутрішній помилці.
     fallback_chat_id = (update.get("message") or update.get("edited_message") or {}).get("chat", {}).get("id")
     try:
+        bot = Bot(cfg.telegram_token) if fallback_chat_id else None
+        if bot:
+            try:
+                bot.send_chat_action(fallback_chat_id, "typing")
+            except OSError:
+                log.debug("telegram typing action failed", exc_info=True)
         llm = LLM(cfg=cfg)
         seed = load_seed(cfg.seed_path)
         result = handle_update(update, cfg, llm, seed)
         if result:
             chat_id, reply = result
-            bot = Bot(cfg.telegram_token)
-            try:
-                bot.send_chat_action(chat_id, "typing")
-            except OSError:
-                log.debug("telegram typing action failed", exc_info=True)
-            bot.send_message(chat_id, reply)
+            (bot or Bot(cfg.telegram_token)).send_message(chat_id, reply)
     except Exception:
         log.exception("webhook handling failed")
         if fallback_chat_id:
