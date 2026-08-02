@@ -11,7 +11,10 @@
 ## Архітектура
 
 ```
-app.py             Vercel-entrypoint (WSGI): маршрутизує /api/telegram (webhook) і /api/cron
+api/telegram.py    Vercel Python function: Telegram webhook
+api/cron.py        Vercel Python function: щоденний прогноз
+api/health.py      Vercel Python function: health-check
+app.py             спільна WSGI-логіка для api/* entrypoints
 astro_bot/
   handlers.py      stateless-логіка: маршрутизація апдейтів, збірка прогнозу/відповіді
   telegram_api.py  мінімальний клієнт Telegram Bot API (stdlib)
@@ -45,8 +48,15 @@ tests/                 pytest
    у cron-запиті як `Authorization: Bearer <CRON_SECRET>`. `SWISSEPH_PATH`/`SEED_PATH`
    визначаються з кореня репо.
 
-3. **Deploy.** Cron (`vercel.json`) активується автоматично: `0 16 * * *` UTC = 18:00 за
+3. **Deploy.** Vercel має побачити Python Functions `api/telegram.py`, `api/cron.py`,
+   `api/health.py`. Cron (`vercel.json`) активується автоматично: `0 16 * * *` UTC = 18:00 за
    літнім київ./варш. часом (узимку — 17:00; Vercel Cron без таймзон, на Hobby — раз/добу).
+
+   Після деплою перевір health-check:
+
+   ```bash
+   curl "https://<project>.vercel.app/api/health"
+   ```
 
 4. **Зареєструвати webhook** (одноразово):
 

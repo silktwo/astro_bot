@@ -2,6 +2,9 @@ import io
 import json
 
 import app
+from api import cron as cron_api
+from api import health as health_api
+from api import telegram as telegram_api
 
 
 def _start_response(status, headers):
@@ -30,7 +33,7 @@ def test_cron_requires_recipient_chat_id(monkeypatch):
     monkeypatch.setenv("OPENCODE_API_KEY", "key")
     monkeypatch.setenv("CRON_SECRET", "secret")
 
-    body = b"".join(app.app(_environ(auth="Bearer secret"), _start_response))
+    body = b"".join(cron_api.app(_environ(auth="Bearer secret"), _start_response))
 
     assert _start_response.status == "500 Internal Server Error"
     assert body == b"RECIPIENT_CHAT_ID not set"
@@ -54,7 +57,7 @@ def test_cron_sends_daily_text_to_configured_recipient(monkeypatch):
     monkeypatch.setattr(app, "daily_text", lambda cfg, llm, seed: "daily")
     monkeypatch.setattr(app, "load_seed", lambda path: {"name": "Анна", "planets": {}})
 
-    body = b"".join(app.app(_environ(auth="Bearer secret"), _start_response))
+    body = b"".join(cron_api.app(_environ(auth="Bearer secret"), _start_response))
 
     assert _start_response.status == "200 OK"
     assert body == b"sent"
@@ -88,9 +91,16 @@ def test_telegram_sends_failure_reply_when_llm_fails(monkeypatch):
     monkeypatch.setattr(app, "Bot", FakeBot)
     monkeypatch.setattr(app, "load_seed", lambda path: {"name": "Анна", "card_text": "карта"})
 
-    body = b"".join(app.app(_telegram_environ(), _start_response))
+    body = b"".join(telegram_api.app(_telegram_environ(), _start_response))
 
     assert _start_response.status == "200 OK"
     assert body == b"ok"
     assert sent[-1][0] == 42
     assert "тимчасово не можу" in sent[-1][1]
+
+
+def test_health_function_returns_ok():
+    body = b"".join(health_api.app(_environ(path="/api/health"), _start_response))
+
+    assert _start_response.status == "200 OK"
+    assert body == b"astro_bot ok"
