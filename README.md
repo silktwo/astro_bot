@@ -36,12 +36,14 @@ tests/                 pytest
    | Змінна | Опис |
    |---|---|
    | `TELEGRAM_BOT_TOKEN` | токен від @BotFather |
-   | `RECIPIENT_CHAT_ID` | chat_id отримувача денного прогнозу |
+   | `RECIPIENT_CHAT_ID` | chat_id отримувача денного прогнозу; напиши боту `/id`, щоб його побачити |
    | `TELEGRAM_WEBHOOK_SECRET` | довільний секрет для валідації вебхука |
    | `OPENCODE_API_KEY` / `OPENCODE_BASE_URL` | LLM API |
    | `PUSH_TZ` | таймзона прогнозу (`Europe/Warsaw`) |
 
-   `CRON_SECRET` Vercel створює сам; `SWISSEPH_PATH`/`SEED_PATH` визначаються з кореня репо.
+   `CRON_SECRET` треба додати як env-змінну у Vercel; тоді Vercel автоматично передасть її
+   у cron-запиті як `Authorization: Bearer <CRON_SECRET>`. `SWISSEPH_PATH`/`SEED_PATH`
+   визначаються з кореня репо.
 
 3. **Deploy.** Cron (`vercel.json`) активується автоматично: `0 16 * * *` UTC = 18:00 за
    літнім київ./варш. часом (узимку — 17:00; Vercel Cron без таймзон, на Hobby — раз/добу).
@@ -57,6 +59,7 @@ tests/                 pytest
 ## Команди бота
 
 - `/start` — привітання.
+- `/id` — показує chat_id, який треба поставити в `RECIPIENT_CHAT_ID` для автопрогнозу.
 - `/today` — денний прогноз прямо зараз.
 - будь-який текст — питання до астролога (відповідь спирається на карту).
 - фото — ввічлива відмова (vision недоступний на поточному плані).
