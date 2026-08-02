@@ -17,11 +17,12 @@ def test_write_system_is_ukrainian_warm():
 
 def test_write_system_requests_personal_day_sections():
     s = prompts.WRITE_SYSTEM
-    assert "120-180 слів" in s
+    assert "450-650 слів" in s
     assert "як її можуть бачити люди" in s
     assert "що краще вдягнути" in s
     assert "що носити" in s
     assert "що робити" in s
+    assert "зранку, вдень і ввечері" in s
 
 
 def test_daily_prompt_requests_personal_guidance():
@@ -30,3 +31,5 @@ def test_daily_prompt_requests_personal_guidance():
     assert "опиши її в цей день" in p
     assert "як її можуть бачити люди" in p
     assert "що краще вдягнути" in p
+    assert "450-650 слів" in p
+    assert "чого краще не форсувати" in p
